@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>OpenCV + TensorFlow.js Demo</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.18.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+</head>
+<body>
+  <h2>Upload Image to Convert to Grayscale and Classify</h2>
+
+  <!-- Form for image upload -->
+  <form method="post" enctype="multipart/form-data">
+    <input type="file" name="image" accept="image/*" required>
+    <button type="submit">Upload</button>
+  </form>
+
+  {% if output_image %}
+    <h3>Grayscale Image:</h3>
+    <!-- Display the processed grayscale image -->
+    <img id="grayImage" src="{{ url_for('static', filename=output_image) }}" alt="Grayscale Image" width="300">
+    
+    <h3>TensorFlow.js Classification:</h3>
+    <pre id="result">Loading model...</pre>
+  {% endif %}
+
+  <script>
+    // Function to classify the uploaded image using TensorFlow.js
+    async function classifyImage() {
+      const img = document.getElementById('grayImage');
+      if (!img) return;
+
+      const model = await mobilenet.load();
+      const predictions = await model.classify(img);
+
+      // Display classification result
+      document.getElementById("result").textContent =
+        "Predictions:\n" +
+        predictions.map(p =>
+          `${p.className}: ${Math.round(p.probability * 100)}%`
+        ).join("\n");
+    }
+
+    // Automatically classify image when it's loaded
+    window.onload = function () {
+      if (document.getElementById('grayImage')) {
+        classifyImage();
+      }
+    }
+  </script>
+</body>
+</html>
